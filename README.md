@@ -57,7 +57,7 @@ models are cached.
 Requires **macOS 26 (Tahoe) or later** on **Apple Silicon** (M1+).
 
 ```sh
-brew tap bithuman/bitchat https://github.com/bithuman-product/bitchat
+brew tap bithuman-product/bitchat
 brew install bitchat
 bitchat
 ```
@@ -125,7 +125,7 @@ without sending your audio anywhere.
 
 ## Contributing / source
 
-This repo (`bithuman-product/bitchat`) hosts the **release artefacts**: the
+This repo (`bithuman-product/homebrew-bitchat`) hosts the **release artefacts**: the
 Homebrew formula, notarised binaries, and this README. The Swift source code
 lives in a separate dev repo and is currently invitation-only — open an
 issue here if you'd like access.

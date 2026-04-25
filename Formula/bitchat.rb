@@ -2,18 +2,22 @@
 # https://www.bithuman.ai
 #
 # Install:
-#   brew tap bithuman/bitchat https://github.com/bithuman-product/bitchat
+#   brew tap bithuman-product/bitchat
 #   brew install bitchat
 #   bitchat
+#
+# (Tap nickname `bithuman-product/bitchat` resolves to the
+# `homebrew-bitchat` repo via Homebrew's convention — the leading
+# `homebrew-` prefix is auto-prepended to the repo name.)
 #
 # This formula installs a prebuilt, Developer ID-signed and Apple-
 # notarised binary. No Xcode required on the user's machine. First
 # launch downloads ~3 GB of model weights to ~/.cache/huggingface/hub/.
 class Bitchat < Formula
   desc "On-device voice chat CLI for macOS (ASR + LLM + TTS, all local)"
-  homepage "https://github.com/bithuman-product/bitchat"
+  homepage "https://github.com/bithuman-product/homebrew-bitchat"
   version "0.1.0"
-  url "https://github.com/bithuman-product/bitchat/releases/download/v#{version}/bitchat-#{version}.zip"
+  url "https://github.com/bithuman-product/homebrew-bitchat/releases/download/v#{version}/bitchat-#{version}.zip"
   sha256 "ad60729cb7eed488bd3072f32aeb5b0029899a6a847ce4abeaa41c97ae7b81a7"
   license "Apache-2.0"
 
