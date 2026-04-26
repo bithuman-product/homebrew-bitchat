@@ -16,9 +16,9 @@
 class Bitchat < Formula
   desc "On-device voice chat CLI for macOS (ASR + LLM + TTS, all local)"
   homepage "https://github.com/bithuman-product/homebrew-bitchat"
-  version "0.2.0"
+  version "0.2.1"
   url "https://github.com/bithuman-product/homebrew-bitchat/releases/download/v#{version}/bitchat-#{version}.zip"
-  sha256 "2a741250856e042a3c48a380e5c23f7f704c495a5cc5b5fac89f1267de75cdd7"
+  sha256 "c9f7a90ada9b0efbbea757b22fdebeb319f477c0882b22bb18e7c4e4f2af9f88"
   license "Apache-2.0"
 
   depends_on macos: :sequoia
