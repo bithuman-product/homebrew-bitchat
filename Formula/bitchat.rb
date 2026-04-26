@@ -18,7 +18,7 @@ class Bitchat < Formula
   homepage "https://github.com/bithuman-product/homebrew-bitchat"
   version "0.2.1"
   url "https://github.com/bithuman-product/homebrew-bitchat/releases/download/v#{version}/bitchat-#{version}.zip"
-  sha256 "2ef0895de0fd71fa81008f1224d062300d77ed6dfa0131e1e11fa5609780bc09"
+  sha256 "a7f16086381c957a76cb5f0cd98608ce8b7840dfe8c10d1bb7d47eaae2996a7a"
   license "Apache-2.0"
 
   depends_on macos: :sequoia

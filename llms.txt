@@ -1,13 +1,15 @@
 # bitchat
 
 > On-device voice chat CLI for macOS 26+ on Apple Silicon. ASR + LLM + TTS
-> all run locally via mlx-swift; no network calls, no API keys. Built and
-> maintained by bitHuman (https://www.bithuman.ai).
+> all run locally via mlx-swift; an optional video mode adds a lip-synced
+> animated avatar via the bitHuman expression engine. No network calls, no
+> API keys. Built and maintained by bitHuman (https://www.bithuman.ai).
 
 `bitchat` is a Homebrew-installable command-line tool. A user running it
-can have a real-time spoken conversation with a local LLM, with voice
-cloning from a short audio clip. Designed to feel like cloud voice
-assistants but stay 100% on-device.
+can have a real-time spoken conversation with a local LLM. Three modes:
+text-only chat, audio-only voice chat, and video chat (voice + a small
+floating avatar window with lip-synced face animation). Designed to feel
+like cloud voice assistants but stay 100% on-device.
 
 ## Install
 
@@ -16,27 +18,58 @@ brew tap bithuman-product/bitchat
 brew install bitchat
 ```
 
-Requires macOS 26 (Tahoe)+, Apple Silicon (M1+), ≥ 8 GB RAM, ~3 GB free
-disk for model weights (cached at `~/.cache/huggingface/hub/` after the
-first launch).
+Requires macOS 26 (Tahoe)+, Apple Silicon (M1+), ≥ 8 GB RAM (16 GB
+recommended for video mode), ~3 GB free disk for voice mode and ~7 GB for
+video mode (cached at `~/.cache/huggingface/hub/` and
+`~/Library/Application Support/bithuman/` after the first launch).
 
 ## Run
 
 ```
-bitchat                                # default English voice
+bitchat                                # voice (default) — audio chat
+bitchat text                           # text-only chat
+bitchat video                          # voice + animated avatar
+bitchat video --image ~/me.jpg         # video chat with a portrait
+
+# common flags (work across modes when applicable)
 bitchat --locale ja-JP                 # Japanese ASR + TTS
-bitchat --voice Aiden                  # English preset speaker
+bitchat --voice Aiden                  # English preset speaker (voice mode)
 bitchat --voice ~/voices/me.wav        # clone a voice from a 10–20 s clip
 bitchat --prompt "Be terse."           # override system prompt
 bitchat --prompt @/path/to/persona.txt # … or read it from a file
 bitchat --help                         # full usage
 ```
 
-Built-in TTS preset speakers: English (`Ryan`, `Aiden`); Chinese
-(`Vivian`, `Serena`, `Uncle_Fu`, `Dylan`, `Eric`).
+Voice-mode TTS preset speakers (Qwen3-TTS): English (`Ryan`, `Aiden`);
+Chinese (`Vivian`, `Serena`, `Uncle_Fu`, `Dylan`, `Eric`).
 
-Cancel the bot's reply at any point by speaking — barge-in cutoff is
-under 80 ms end-to-end. Quit with Ctrl-C.
+Video-mode TTS voices (Kokoro): `af_heart`, `af_alloy`, `af_aoede`,
+`af_kore`, `bf_emma`, `am_adam`, `am_michael`, `am_echo`, `bm_george`.
+
+Cancel the bot's reply at any point by speaking — barge-in cutoff is under
+80 ms end-to-end (audio + avatar both, in video mode). Quit with Cmd-Q,
+Ctrl-C, or right-click → "Quit bitchat".
+
+## Video mode
+
+`bitchat video` opens a small floating circular window with a talking face.
+The avatar's lip movements stay frame-paired with the bot's audio at
+25 FPS via the bitHuman expression engine (Wav2Vec2 → DiT → VAE).
+
+A colored ring around the avatar signals state: cyan = listening,
+violet = thinking, amber = speaking. A label below echoes the same.
+
+Right-click the avatar to customize:
+
+- **Choose agent…** — gallery of 8 bundled personas (face + voice +
+  prompt as a coherent set). Names: Diego (default), Nova, Einstein,
+  Riya, Lena, Rae, Dr. Maya, Mason. Picking a card swaps all three.
+- **Change image…** — pick a portrait file or drag-drop one onto the
+  avatar. ~5 s VAE encode then the avatar speaks through your portrait.
+- **Change voice…** — gallery of 9 Kokoro voices grouped Feminine /
+  Masculine. Click to audition, Save to commit.
+- **Change prompt…** — multi-line editor with 6 starter templates
+  (Companion, Coach, Tutor, Storyteller, Coding buddy, Calm listener).
 
 ## Architecture (high-level)
 
@@ -44,9 +77,12 @@ under 80 ms end-to-end. Quit with Ctrl-C.
 |---|---|
 | ASR | Apple SpeechAnalyzer (`Speech` framework, on-device, macOS 26+) |
 | LLM | `mlx-community/gemma-4-E2B-it-4bit` via `ml-explore/mlx-swift-lm` |
-| TTS | `mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit` via `Blaizzy/mlx-audio-swift` |
-| AEC | hardware: `AVAudioEngine` voice-processing IO unit on both ends |
-| Voice cloning | in-context speaker conditioning via Qwen3-TTS `refAudio` + `refText` |
+| TTS — voice mode | `mlx-community/Qwen3-TTS-12Hz-0.6B-Base-4bit` via `Blaizzy/mlx-audio-swift` (voice cloning supported) |
+| TTS — video mode | `mlx-community/Kokoro-82M-4bit` via `Blaizzy/mlx-audio-swift` (preset voices, lighter weight for A/V sync) |
+| Avatar — video mode | bitHuman expression engine: Wav2Vec2 audio encoder + DiT denoiser + VAE encoder |
+| AEC | hardware: `AVAudioEngine` voice-processing IO unit, both ends |
+| A/V sync — video mode | chunk-paired playback: each TTS audio chunk + the matching DiT video frames are queued together at 25 FPS |
+| Voice cloning — voice mode | in-context speaker conditioning via Qwen3-TTS `refAudio` + `refText` |
 
 Source code (Swift 6, SPM) lives in a private dev repo
 (`bithuman-product/bitchat-dev`). External installs come through this
@@ -54,9 +90,8 @@ public repo's Homebrew formula and notarised release zips.
 
 ## Library use (Swift)
 
-Embedding bitchat as a library (`BitChatKit` SwiftPM target) is
-supported but currently invitation-only. The public API surface looks
-like:
+Embedding bitchat as a library (`BitChatKit` SwiftPM target) is supported
+but currently invitation-only. The public API surface looks like:
 
 ```swift
 import BitChatKit
@@ -68,16 +103,24 @@ config.voice = .preset("Aiden")
 // or .clone(referenceAudio: URL, transcript: String)
 // or .default
 
+// Optional avatar config for video mode:
+// config.avatar = AvatarConfig(modelPath: weightsURL, portraitPath: portraitURL)
+
 let chat = VoiceChat(config: config)
 try await chat.start()
+
+// Curated agent library:
+for agent in AgentCatalog.all { ... }
 ```
 
-Open an issue at https://github.com/bithuman-product/homebrew-bitchat/issues if
-you'd like access to the source repo for library embedding.
+Open an issue at https://github.com/bithuman-product/homebrew-bitchat/issues
+if you'd like access to the source repo for library embedding.
 
 ## License
 
-Apache-2.0. Bundled model weights are also Apache-2.0.
+Apache-2.0 for the Swift source and the bundled Gemma / Kokoro / Qwen3-TTS
+weights. The bitHuman expression-engine SDK ships under the bitHuman SDK
+license; see LICENSE in the dev repo for details.
 
 ## Maintainer
 
