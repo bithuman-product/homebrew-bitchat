@@ -59,6 +59,12 @@ The avatar's lip movements stay frame-paired with the bot's audio at
 A colored ring around the avatar signals state: cyan = listening,
 violet = thinking, amber = speaking. A label below echoes the same.
 
+Idle GPU usage is near-zero: bitchat captures ~10 s of idle DiT
+frames into a palindrome cache, then loops them forward / reverse
+forever instead of regenerating. The cache invalidates when the
+portrait changes (drag-drop, agent pick, --image swap), then
+refills over the next ~10 s. Speech still streams through DiT live.
+
 Right-click the avatar to customize:
 
 - **Choose agent…** — gallery of 8 bundled personas (face + voice +

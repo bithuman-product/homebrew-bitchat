@@ -133,6 +133,16 @@ A colored ring around the avatar tells you what it's doing:
 A label below the circle echoes the same. While the engine warms up at
 launch, a brand-coral particle field pulses in the avatar's place.
 
+### Quiet idle (no fans, no battery drain)
+
+Continuous DiT inference for the avatar's idle breathing was holding the
+GPU at ~90 %. v0.5.0 captures the first ~10 s of idle motion into a
+per-portrait palindrome cache — once that buffer fills, bitchat plays the
+frames forward → reverse → forward indefinitely instead of regenerating.
+**GPU drops to near-zero during idle.** Speech still streams through DiT
+live. The cache invalidates the moment you swap the portrait or pick a
+different agent, then refills over the next ~10 s.
+
 ## Quick start
 
 ```sh
@@ -197,6 +207,10 @@ No swap pressure during normal conversation in any mode.
   doesn't transcribe its own voice back into the mic, even on laptop
   speakers — and in video mode the avatar's chunk-paired audio path keeps
   AEC's reference signal in lockstep with playback.
+- **Quiet when idle.** A palindrome cache catches the avatar's idle motion
+  after ~10 s; from then on, the GPU drops to near-zero until you speak.
+  Leave bitchat open for hours without spinning the fans or draining the
+  battery.
 - **Apache 2.0** — both the code and the bundled model weights (the
   bitHuman expression-engine SDK ships under bitHuman's SDK license; see
   [LICENSE](LICENSE) for details).
