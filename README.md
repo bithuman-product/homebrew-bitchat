@@ -65,15 +65,29 @@ bitchat
 That's it. First launch downloads ~3 GB of model weights to
 `~/.cache/huggingface/hub/`. Every launch after that is offline-only.
 
+## Three modes
+
+```sh
+bitchat                                  # voice (default)
+bitchat text                             # text-only chat — pipe-friendly
+bitchat video                            # voice + lip-synced animated avatar
+bitchat video --image ~/me.jpg           # video chat with your portrait
+```
+
 ## Quick start
 
 ```sh
-bitchat                                  # default voice, English
-bitchat --voice Aiden                    # English preset speaker
-bitchat --voice ~/voices/me.wav          # clone your own voice (auto-transcribed)
-bitchat --locale ja-JP                   # listen + reply in Japanese
-bitchat --prompt "Be a deadpan ship's computer."
+bitchat voice --voice Aiden              # English preset speaker
+bitchat voice --voice ~/voices/me.wav    # clone your own voice (auto-transcribed)
+bitchat voice --locale ja-JP             # listen + reply in Japanese
+bitchat text --prompt "Be a deadpan ship's computer."
+echo "summarise this:" | bitchat text    # use as a shell pipe
 ```
+
+`bitchat video` opens a small floating circular window with a
+talking face. Speak to it, watch the mouth move with the bot's voice
+in real time. First launch downloads the expression engine (~3.7 GB)
+and a smaller TTS model (~150 MB) for the avatar pipeline.
 
 | flag | what it does |
 |---|---|
