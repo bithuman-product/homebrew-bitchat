@@ -140,8 +140,9 @@ shut down cleanly.
 ## Quick start
 
 ```sh
-bitchat voice --voice Aiden              # English preset speaker
-bitchat voice --voice ~/voices/me.wav    # clone your own voice (auto-transcribed)
+bitchat voice --voice Aiden              # voice mode: Qwen3 preset speaker
+bitchat voice --voice ~/voices/me.wav    # voice mode: clone your own voice (auto-transcribed)
+bitchat video --voice am_michael         # video mode: Kokoro preset speaker
 bitchat voice --locale ja-JP             # listen + reply in Japanese
 bitchat text --prompt "Be a deadpan ship's computer."
 bitchat video --image ~/Desktop/me.jpg   # your face, default voice
@@ -151,8 +152,8 @@ echo "summarise this:" | bitchat text    # use as a shell pipe
 | flag | what it does |
 |---|---|
 | `--locale <bcp47>` | ASR + TTS language (default `en-US`). Examples: `en-US`, `ja-JP`, `zh-CN`, `es-ES`, `fr-FR`. |
-| `--voice <preset\|path>` | (voice mode) Preset name or a path to a 10–20 s mono audio file. Path = your voice gets cloned and the transcript is auto-detected. |
-| `--image <path>` | (video mode) Portrait file. Defaults to Diego's bundled portrait. |
+| `--voice <preset\|path>` | Pick the bot's voice. Accepted values differ by mode (the two modes use different TTS engines): **voice mode** takes a Qwen3 preset (`Ryan`, `Aiden`, `Vivian`, `Serena`, `Uncle_Fu`, `Dylan`, `Eric`) **or a path** to a 10–20 s mono audio file, which is cloned and auto-transcribed. **video mode** takes a Kokoro preset only (`af_heart`, `af_alloy`, `af_aoede`, `af_kore`, `am_adam`, `am_michael`, `am_echo`, `bf_emma`, `bm_george`); cloning isn't supported in video mode (the avatar engine needs the GPU, so video uses a smaller TTS that doesn't clone). |
+| `--image <preset\|path>` | (video mode) Bundled portrait preset (`Alice`, `Marco`, `Captain`, `Nia`, `Riley`) or a path to JPG/PNG/HEIC. Defaults to the active agent's portrait. |
 | `--prompt <text\|@path>` | Override the system prompt. Inline string or `@/path/to/file.txt`. |
 | `-h`, `--help` | Show usage. |
 
@@ -176,7 +177,7 @@ echo "summarise this:" | bitchat text    # use as a shell pipe
 |---|---|
 | Speech-to-text | Apple's built-in `Speech` framework |
 | Language model | Local 2-billion-parameter LLM (4-bit quantized) |
-| Voice synthesis | Local on-device TTS (voice-cloning capable) |
+| Voice synthesis | Two local TTS engines: Qwen3-TTS in voice mode (voice-cloning capable), Kokoro in video mode (preset voices only — lighter, coexists with the avatar GPU pipeline) |
 | Avatar animation | bitHuman expression engine (lip-sync at 25 FPS) |
 
 Working set on a 24 GB M-series MacBook Pro:
