@@ -1,22 +1,29 @@
-# bitchat
+# bithuman-cli
 
 > On-device voice + avatar chat CLI for macOS, made by bitHuman.
 > Speech-to-text + a local LLM + voice synthesis + (optional) a
 > lip-synced animated face — all running locally on Apple Silicon.
 > No network calls, no API keys. Source: https://www.bithuman.ai
+>
+> Previously distributed as `bitchat`; the binary, tap, and formula
+> were renamed in v0.6.x. The product itself is unchanged.
 
-`bitchat` is a Homebrew-installable command-line tool. A user running
-it can have a real-time spoken or typed conversation with a local
-assistant, optionally with a small floating avatar window that lip-
-syncs. Three modes: text-only chat, audio-only voice chat, and video
-chat (voice + animated face).
+`bithuman-cli` is a Homebrew-installable command-line tool. A user
+running it can have a real-time spoken or typed conversation with a
+local assistant, optionally with a small floating avatar window that
+lip-syncs. Three modes: text-only chat, audio-only voice chat, and
+video chat (voice + animated face).
 
 ## Install
 
 ```
-brew tap bithuman-product/bitchat
-brew install bitchat
+brew tap bithuman-product/bithuman
+brew install bithuman-cli
 ```
+
+If the user previously installed the legacy `bitchat` formula, have
+them run `brew uninstall bitchat && brew untap bithuman-product/bitchat`
+before tapping the new repo.
 
 Requires macOS 26 (Tahoe) or later, Apple Silicon (M1+), ≥ 8 GB RAM
 (16 GB recommended for video mode), ~3 GB free disk for voice and
@@ -28,19 +35,19 @@ offline.
 ## Run
 
 ```
-bitchat                                # voice (default) — audio chat
-bitchat text                           # text-only chat
-bitchat video                          # voice + animated avatar
-bitchat video --image ~/me.jpg         # video chat with a portrait
+bithuman-cli                                # voice (default) — audio chat
+bithuman-cli text                           # text-only chat
+bithuman-cli video                          # voice + animated avatar
+bithuman-cli video --image ~/me.jpg         # video chat with a portrait
 
 # common flags (apply where relevant)
-bitchat --locale ja-JP                       # Japanese ASR + TTS
-bitchat voice --voice Aiden                  # voice mode: Qwen3 preset
-bitchat voice --voice ~/voices/me.wav        # voice mode: clone from a 10–20 s clip
-bitchat video --voice am_michael             # video mode: Kokoro preset (no cloning)
-bitchat --prompt "Be terse."                 # override the system prompt
-bitchat --prompt @/path/to/persona.txt       # … or read from a file
-bitchat --help                               # full usage
+bithuman-cli --locale ja-JP                       # Japanese ASR + TTS
+bithuman-cli voice --voice Aiden                  # voice mode: Qwen3 preset
+bithuman-cli voice --voice ~/voices/me.wav        # voice mode: clone from a 10–20 s clip
+bithuman-cli video --voice am_michael             # video mode: Kokoro preset (no cloning)
+bithuman-cli --prompt "Be terse."                 # override the system prompt
+bithuman-cli --prompt @/path/to/persona.txt       # … or read from a file
+bithuman-cli --help                               # full usage
 ```
 
 **`--voice` accepted values, by mode** (each mode uses a different TTS
@@ -56,7 +63,7 @@ out with a helpful message if you mix them up):
   GPU pipeline can't share Metal with Qwen3-TTS). Presets:
   `af_heart`, `af_alloy`, `af_aoede`, `af_kore`, `am_adam`,
   `am_michael`, `am_echo`, `bf_emma`, `bm_george`. Paths are rejected
-  in video mode — for cloning, run `bitchat voice --voice <path>`.
+  in video mode — for cloning, run `bithuman-cli voice --voice <path>`.
 
 The bot replies after the user stops speaking. The user can:
 
@@ -67,15 +74,16 @@ The bot replies after the user stops speaking. The user can:
   the audio and avatar within ~50 ms.
 
 Quit with Cmd-Q (video mode), Ctrl-C, or right-click →
-"Quit bitchat". All paths run a clean shutdown.
+"Quit bitHuman". All paths run a clean shutdown.
 
-Set `BITCHAT_VERBOSE=1` to surface model-loading internals (tensor
+Set `BITHUMAN_VERBOSE=1` to surface model-loading internals (tensor
 counts, dtype breakdowns) while debugging; silent by default.
 
 ## Video mode
 
-`bitchat video` opens a small floating circular window with a talking
-face. Lip movements stay frame-paired with the bot's audio at 25 FPS.
+`bithuman-cli video` opens a small floating circular window with a
+talking face. Lip movements stay frame-paired with the bot's audio at
+25 FPS.
 
 A colored ring around the avatar signals state: cyan = listening,
 violet = thinking, amber = speaking. A label below echoes the same.
@@ -87,7 +95,8 @@ Right-click the avatar to customize:
   Riya, Lena, Rae, Dr. Maya, Mason. Picking a card swaps all three.
 - **Change image…** — pick a portrait file or drag-drop one onto
   the avatar. ~5 s on-device encode, then the avatar speaks through
-  your portrait.
+  your portrait. Bundled portrait presets: Alice, Marco, Captain,
+  Nia, Riley.
 - **Change voice…** — gallery of 9 voices grouped Feminine /
   Masculine. Click to audition, Save to commit.
 - **Change prompt…** — multi-line editor with 6 starter templates
@@ -100,8 +109,9 @@ battery draw.
 
 ## What's local
 
-- **Speech-to-text** — Apple's `Speech` framework, on-device, macOS 26+.
-- **Language model** — small (~2 B param) instruct LLM, 4-bit
+- **Speech-to-text** — Apple's `Speech` framework (SpeechAnalyzer),
+  on-device, macOS 26+.
+- **Language model** — Gemma 4 E2B (~2 B param) instruct LLM, 4-bit
   quantized, running through MLX.
 - **Voice synthesis** — two TTS engines, picked by mode:
   - voice mode uses Qwen3-TTS (~600 M params, 4-bit) with voice cloning.
@@ -115,11 +125,11 @@ No request leaves the machine.
 
 ## For developers
 
-bitchat is also a Swift library, `BitChatKit`. Library access is
+bithuman-cli is also a Swift library, `bitHumanKit`. Library access is
 currently invitation-only:
 
 ```swift
-import BitChatKit
+import bitHumanKit
 
 var config = VoiceChatConfig()
 config.localeIdentifier = "en-US"
@@ -134,8 +144,8 @@ try await chat.start()
 ```
 
 Open an issue at
-https://github.com/bithuman-product/homebrew-bitchat/issues if you'd
-like access to the source dev repo.
+https://github.com/bithuman-product/homebrew-bithuman/issues if you'd
+like access to the source dev repo (`bithuman-kit`).
 
 ## License
 
@@ -146,4 +156,4 @@ see LICENSE in the dev repo for full terms.
 ## Maintainer
 
 bitHuman Inc. — https://www.bithuman.ai. Issues / questions:
-https://github.com/bithuman-product/homebrew-bitchat/issues.
+https://github.com/bithuman-product/homebrew-bithuman/issues.
